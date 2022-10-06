@@ -90,7 +90,7 @@ zabbix_export:
             -
               type: JSONPATH
               parameters:
-                - $.ocs.data.activeUsers.last1hour
+                - $.ocs.data.activeUsers.last5minutes
           master_item:
             key: nextcloud.monitoring_data
           tags:
