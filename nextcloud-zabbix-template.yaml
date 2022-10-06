@@ -1,0 +1,400 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-10-06T11:45:15Z'
+  groups:
+    -
+      uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    -
+      uuid: b2bf70c9178944a29a3be4fa7f1e1f78
+      template: 'Nextcloud Serverinfo'
+      name: 'Nextcloud Serverinfo'
+      description: |
+        Monitor Nextcloud using the external monitoring endpoint of your Nextcloud instance.
+        See your Nextcloud instance's admin -> system page for more info.
+        
+        Add these two macros to your Nextcloud host:
+        {$NCTOKEN} - external monitoring endpoint access token as secret text
+        {$SERVERINFO_URL} - external monitoring endpoint URL
+      groups:
+        -
+          name: Templates
+      items:
+        -
+          uuid: 18775b2eec354cc18b43a72252b962ff
+          name: 'Database Size'
+          type: DEPENDENT
+          key: nextcloud.db_size
+          delay: '0'
+          units: B
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.server.database.size
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: info
+        -
+          uuid: 4cb68e35f9a24512b6eb7af387f01ad3
+          name: 'Database Version'
+          type: DEPENDENT
+          key: nextcloud.db_version
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  x = JSON.parse(value);
+                  type = x.ocs.data.server.database.type;
+                  version = x.ocs.data.server.database.version;
+                  return type + " " + version;
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: info
+        -
+          uuid: 41aa09c7d2ce47e580efb7c7d629862b
+          name: 'Active Users 1h'
+          type: DEPENDENT
+          key: nextcloud.last1hour
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.activeUsers.last1hour
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: 'active users'
+        -
+          uuid: fcd345e3cc4e4473a5f3ae0e789d78cd
+          name: 'Active Users 5m'
+          type: DEPENDENT
+          key: nextcloud.last5minutes
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.activeUsers.last1hour
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: 'active users'
+        -
+          uuid: 112c377ae8e44e928fefd464d82cfcc1
+          name: 'Active Users 24h'
+          type: DEPENDENT
+          key: nextcloud.last24hours
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.activeUsers.last24hours
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: 'active users'
+        -
+          uuid: a0fc8da31a3540fc94b1e69db3c790e6
+          name: 'Nextcloud Monitoring Data'
+          type: HTTP_AGENT
+          key: nextcloud.monitoring_data
+          delay: 5m
+          history: 1d
+          trends: '0'
+          value_type: TEXT
+          timeout: 60s
+          url: '{$SERVERINFO_URL}'
+          query_fields:
+            -
+              name: format
+              value: json
+          headers:
+            -
+              name: NC-Token
+              value: '{$NCTOKEN}'
+          allow_traps: 'YES'
+        -
+          uuid: 2181ad47abed4282bbb03a1c139a47fc
+          name: 'Number of Files'
+          type: DEPENDENT
+          key: nextcloud.num_files
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.storage.num_files
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: info
+        -
+          uuid: 87c0a43846b94eb8a72e8854a0bcc110
+          name: 'Number of Shares'
+          type: DEPENDENT
+          key: nextcloud.num_shares
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.shares.num_shares
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: info
+            -
+              tag: Nextcloud
+              value: shares
+        -
+          uuid: 46b4c1625af74d15aa1058ffc11edebe
+          name: 'Group Shares'
+          type: DEPENDENT
+          key: nextcloud.num_shares_groups
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.shares.num_shares_groups
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: shares
+        -
+          uuid: b3ffd73c592e4feebde16db8efcd84e7
+          name: 'Link Shares'
+          type: DEPENDENT
+          key: nextcloud.num_shares_link
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.shares.num_shares_link
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: shares
+        -
+          uuid: 26aafb9896b44bacab6c29a16b5063d4
+          name: 'Link Shares Without Password'
+          type: DEPENDENT
+          key: nextcloud.num_shares_link_no_password
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.shares.num_shares_link_no_password
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: shares
+        -
+          uuid: c014b0c6051943b7b4ed61ff66c9b225
+          name: 'Mail Shares'
+          type: DEPENDENT
+          key: nextcloud.num_shares_mail
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.shares.num_shares_mail
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: shares
+        -
+          uuid: b519174735f74748b40fd7042602a7d3
+          name: 'User Shares'
+          type: DEPENDENT
+          key: nextcloud.num_shares_user
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.shares.num_shares_user
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: shares
+        -
+          uuid: f344b0585e43430db3828e9a547d4252
+          name: 'Nextcloud Users'
+          type: DEPENDENT
+          key: nextcloud.num_users
+          delay: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.storage.num_users
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: info
+        -
+          uuid: dc84579d093e4237acdb1bac718115c8
+          name: 'PHP Version'
+          type: DEPENDENT
+          key: nextcloud.php_version
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.server.php.version
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: info
+        -
+          uuid: c736bf365b184092afb27bacaf6fbc09
+          name: 'Nextcloud Version'
+          type: DEPENDENT
+          key: nextcloud.version
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ocs.data.nextcloud.system.version
+          master_item:
+            key: nextcloud.monitoring_data
+          tags:
+            -
+              tag: Nextcloud
+              value: info
+      tags:
+        -
+          tag: Application
+          value: Nextcloud
+      macros:
+        -
+          macro: '{$NCTOKEN}'
+          type: SECRET_TEXT
+          description: 'To use an access token, please generate one then set it using the following command: occ config:app:set serverinfo token --value yourtoken'
+        -
+          macro: '{$SERVERINFO_URL}'
+          description: 'Nextcloud external monitoring endpoint URL'
+  graphs:
+    -
+      uuid: 4c3bb6b7296743d8920f19eb27ebf77a
+      name: 'Active Users'
+      graph_items:
+        -
+          sortorder: '1'
+          color: 00C800
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.last5minutes
+        -
+          sortorder: '2'
+          color: F63100
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.last1hour
+        -
+          sortorder: '3'
+          color: 2774A4
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.last24hours
+    -
+      uuid: 916dd1c554eb46cfaa1ab3131049657f
+      name: 'Number of files'
+      graph_items:
+        -
+          sortorder: '1'
+          color: 00C800
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.num_files
+    -
+      uuid: 0ff49511fb6540db8b9f6f9aebc1c827
+      name: Shares
+      graph_items:
+        -
+          sortorder: '1'
+          color: C80000
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.num_shares
+        -
+          sortorder: '2'
+          color: 0000C8
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.num_shares_groups
+        -
+          sortorder: '3'
+          color: C800C8
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.num_shares_user
+        -
+          sortorder: '4'
+          color: 00C8C8
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.num_shares_link
+        -
+          sortorder: '5'
+          color: C8C800
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.num_shares_link_no_password
+        -
+          sortorder: '6'
+          color: 6C59DC
+          item:
+            host: 'Nextcloud Serverinfo'
+            key: nextcloud.num_shares_mail
